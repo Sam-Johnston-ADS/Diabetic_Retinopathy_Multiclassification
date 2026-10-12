@@ -31,7 +31,7 @@ from torchvision import transforms
 # CONSTANTS
 # ============================================================
 
-PROJECT_ROOT = Path(r"A:\DR_classification")
+PROJECT_ROOT = Path(__file__).resolve().parent
 MSAG_CHECKPOINT = (
     PROJECT_ROOT / "runs_EfficientNetB3_MSAG_Refined_Stable" / "outputs" / "best_model_qwk.pth"
 )

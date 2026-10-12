@@ -1,0 +1,12 @@
+torch
+torchvision
+timm
+open-clip-torch
+transformers
+huggingface-hub
+safetensors
+streamlit
+opencv-python
+matplotlib
+numpy
+Pillow
