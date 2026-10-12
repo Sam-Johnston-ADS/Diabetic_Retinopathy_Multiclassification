@@ -3,17 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diabetic Retinopathy Screening & Explainability</title>
+  <title>RetinaVision AI — Diabetic Retinopathy Screening & Explainability</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    .glass-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-    }
-  </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
 
@@ -33,26 +27,59 @@
         </div>
       </div>
 
-      <!-- Backend Connection Settings -->
-      <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="status-dot"></span>
-        <label for="api-url" class="text-slate-400 font-medium">API Endpoint:</label>
-        <input 
-          type="text" 
-          id="api-url" 
-          value="http://localhost:8000" 
-          class="bg-slate-800 text-slate-200 px-2 py-0.5 rounded border border-slate-700 font-mono text-xs focus:ring-1 focus:ring-indigo-500 outline-none w-48"
-          title="Enter your FastAPI backend URL (e.g., http://localhost:8000 or your Cloudflare/AWS URL)"
-        />
-        <button id="test-api-btn" class="hover:text-indigo-400 text-slate-400 transition" title="Test Connection">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+      <!-- Controls: Mode Toggle & Backend URL -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Demo Mode / Live Mode Pill -->
+        <button 
+          id="mode-toggle-btn" 
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition bg-indigo-950/60 border-indigo-500/40 text-indigo-300 hover:bg-indigo-900/60"
+          title="Toggle between Live API and Instant Demo Mode"
+        >
+          <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" id="mode-dot"></span>
+          <span id="mode-label">Mode: Live API</span>
         </button>
+
+        <!-- Backend Connection Settings -->
+        <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-xs" id="api-box">
+          <span class="w-2 h-2 rounded-full bg-amber-400" id="status-dot"></span>
+          <label for="api-url" class="text-slate-400 font-medium">API Endpoint:</label>
+          <input 
+            type="text" 
+            id="api-url" 
+            placeholder="https://... or http://localhost:8000"
+            class="bg-slate-800 text-slate-200 px-2 py-0.5 rounded border border-slate-700 font-mono text-xs focus:ring-1 focus:ring-indigo-500 outline-none w-48 sm:w-64"
+          />
+          <button id="test-api-btn" class="hover:text-indigo-400 text-slate-400 transition" title="Test Connection">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
+  <!-- Mixed Content / Disconnection Warning Banner -->
+  <div id="mixed-content-banner" class="hidden bg-amber-500/10 border-b border-amber-500/30 px-4 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs text-amber-200">
+      <div class="flex items-center gap-2">
+        <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400 shrink-0"></i>
+        <span>
+          <strong>HTTPS / Mixed Content Notice:</strong> Because this app is hosted on <strong>HTTPS</strong> (<code class="bg-amber-950/50 px-1 py-0.5 rounded">vercel.app</code>), browsers block insecure <code class="bg-amber-950/50 px-1 py-0.5 rounded">http://localhost:8000</code>.
+          Use an HTTPS tunnel (e.g., Cloudflare) or switch to <strong>Instant Demo Mode</strong> for immediate screening.
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="banner-demo-btn" class="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-100 font-semibold border border-amber-500/40 transition">
+          Switch to Demo Mode
+        </button>
+        <button id="banner-close-btn" class="text-amber-400 hover:text-amber-200">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
     
     <!-- Left Column: Image Upload & Parameters -->
     <div class="lg:col-span-5 space-y-6">
@@ -89,21 +116,21 @@
 
         <!-- Sample Case Buttons -->
         <div class="mt-4 pt-4 border-t border-slate-800/80">
-          <p class="text-xs text-slate-400 font-medium mb-2 flex items-center justify-between">
-            <span>Or load benchmark samples:</span>
-            <span class="text-[10px] text-slate-500">1-click test</span>
-          </p>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-slate-400 font-medium">Or load benchmark samples:</span>
+            <span class="text-[10px] text-indigo-400 font-semibold bg-indigo-950/40 px-2 py-0.5 rounded border border-indigo-500/20">Pre-computed XAI</span>
+          </div>
           <div class="grid grid-cols-2 gap-2">
-            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-src="./samples/sample_1.png">
+            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-sample="1" data-src="./samples/sample_1.png">
               <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Sample 1 (No DR)
             </button>
-            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-src="./samples/sample_2.png">
+            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-sample="2" data-src="./samples/sample_2.png">
               <span class="w-2 h-2 rounded-full bg-amber-400"></span> Sample 2 (Mild)
             </button>
-            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-src="./samples/sample_3.png">
+            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-sample="3" data-src="./samples/sample_3.png">
               <span class="w-2 h-2 rounded-full bg-orange-400"></span> Sample 3 (Moderate)
             </button>
-            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-src="./samples/sample_4.png">
+            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-sample="4" data-src="./samples/sample_4.png">
               <span class="w-2 h-2 rounded-full bg-red-400"></span> Sample 4 (PDR)
             </button>
           </div>
@@ -121,7 +148,7 @@
         <!-- MSAG Weight Slider -->
         <div>
           <div class="flex justify-between text-xs mb-1">
-            <span class="text-slate-300 font-medium">MSAG Model Weight (Primary)</span>
+            <span class="text-slate-300 font-medium">MSAG Model Weight (Primary CNN)</span>
             <span id="msag-val" class="font-mono text-indigo-400 font-bold">0.70</span>
           </div>
           <input 
@@ -143,7 +170,7 @@
         <!-- Temperature Slider -->
         <div>
           <div class="flex justify-between text-xs mb-1">
-            <span class="text-slate-300 font-medium">BiomedCLIP Temperature</span>
+            <span class="text-slate-300 font-medium">BiomedCLIP Softmax Temperature</span>
             <span id="temp-val" class="font-mono text-indigo-400 font-bold">2.0</span>
           </div>
           <input 
@@ -173,6 +200,25 @@
     <!-- Right Column: Results & Clinical Advice -->
     <div class="lg:col-span-7 space-y-6">
 
+      <!-- Error Notification Box -->
+      <div id="error-box" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-2xl p-6 text-xs text-rose-200 space-y-3">
+        <div class="flex items-start gap-3">
+          <i data-lucide="alert-circle" class="w-5 h-5 text-rose-400 shrink-0 mt-0.5"></i>
+          <div class="space-y-1.5">
+            <h4 class="font-bold text-sm text-rose-100" id="error-title">Backend Connection Error</h4>
+            <p id="error-msg" class="leading-relaxed"></p>
+          </div>
+        </div>
+        <div class="pt-2 border-t border-rose-500/20 flex flex-wrap gap-2">
+          <button id="error-demo-fallback-btn" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold transition">
+            Continue with Instant Demo Mode
+          </button>
+          <button id="error-dismiss-btn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">
+            Dismiss
+          </button>
+        </div>
+      </div>
+
       <!-- Placeholder State -->
       <div id="placeholder-box" class="bg-slate-950 border border-slate-800/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[500px]">
         <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
@@ -189,6 +235,7 @@
         <div class="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
         <h3 class="text-base font-semibold text-slate-200">Executing Multi-Modal Neural Pipeline...</h3>
         <p class="text-xs text-slate-400 mt-1">Extracting multi-scale spatial features, zero-shot prompts & LayerCAM heatmaps</p>
+        <p class="text-[11px] text-slate-500 mt-3 font-mono" id="loading-subtext">Connecting to backend inference engine...</p>
       </div>
 
       <!-- Results Container -->
@@ -294,12 +341,86 @@
     const apiUrlInput = document.getElementById('api-url');
     const testApiBtn = document.getElementById('test-api-btn');
     const statusDot = document.getElementById('status-dot');
+    const modeToggleBtn = document.getElementById('mode-toggle-btn');
+    const modeDot = document.getElementById('mode-dot');
+    const modeLabel = document.getElementById('mode-label');
+    const apiBox = document.getElementById('api-box');
+
+    const mixedContentBanner = document.getElementById('mixed-content-banner');
+    const bannerDemoBtn = document.getElementById('banner-demo-btn');
+    const bannerCloseBtn = document.getElementById('banner-close-btn');
+
+    const errorBox = document.getElementById('error-box');
+    const errorTitle = document.getElementById('error-title');
+    const errorMsg = document.getElementById('error-msg');
+    const errorDemoFallbackBtn = document.getElementById('error-demo-fallback-btn');
+    const errorDismissBtn = document.getElementById('error-dismiss-btn');
 
     const placeholderBox = document.getElementById('placeholder-box');
     const loadingBox = document.getElementById('loading-box');
+    const loadingSubtext = document.getElementById('loading-subtext');
     const resultsBox = document.getElementById('results-box');
 
     let currentFile = null;
+    let currentSampleIndex = null;
+    let isDemoMode = false;
+
+    // Load saved API URL from localStorage or default
+    const savedApiUrl = localStorage.getItem('retinavision_api_url');
+    if (savedApiUrl) {
+      apiUrlInput.value = savedApiUrl;
+    } else {
+      // Default: If served over HTTPS on Vercel, don't set default to http://localhost
+      if (window.location.protocol === 'https:') {
+        apiUrlInput.value = '';
+        apiUrlInput.placeholder = 'https://your-tunnel.trycloudflare.com';
+      } else {
+        apiUrlInput.value = 'http://localhost:8000';
+      }
+    }
+
+    apiUrlInput.addEventListener('change', () => {
+      localStorage.setItem('retinavision_api_url', apiUrlInput.value.trim());
+      checkApiHealth();
+    });
+
+    // Check Mixed Content on HTTPS
+    function checkMixedContent() {
+      const url = apiUrlInput.value.trim();
+      if (window.location.protocol === 'https:' && url.startsWith('http://') && !isDemoMode) {
+        mixedContentBanner.classList.remove('hidden');
+      } else {
+        mixedContentBanner.classList.add('hidden');
+      }
+    }
+    bannerCloseBtn.addEventListener('click', () => mixedContentBanner.classList.add('hidden'));
+    bannerDemoBtn.addEventListener('click', () => setDemoMode(true));
+    errorDemoFallbackBtn.addEventListener('click', () => {
+      errorBox.classList.add('hidden');
+      setDemoMode(true);
+      if (currentFile) runAnalysis();
+    });
+    errorDismissBtn.addEventListener('click', () => errorBox.classList.add('hidden'));
+
+    // Mode Toggle (Live API vs Demo Mode)
+    function setDemoMode(active) {
+      isDemoMode = active;
+      if (isDemoMode) {
+        modeLabel.textContent = 'Mode: Demo Mode (Instant)';
+        modeDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        modeToggleBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition bg-emerald-950/60 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60';
+        statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        mixedContentBanner.classList.add('hidden');
+        errorBox.classList.add('hidden');
+      } else {
+        modeLabel.textContent = 'Mode: Live API';
+        modeDot.className = 'w-2 h-2 rounded-full bg-indigo-400 animate-pulse';
+        modeToggleBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition bg-indigo-950/60 border-indigo-500/40 text-indigo-300 hover:bg-indigo-900/60';
+        checkApiHealth();
+      }
+    }
+
+    modeToggleBtn.addEventListener('click', () => setDemoMode(!isDemoMode));
 
     // Sliders synchronization
     msagSlider.addEventListener('input', () => { msagVal.textContent = parseFloat(msagSlider.value).toFixed(2); });
@@ -313,12 +434,16 @@
       e.preventDefault();
       dropzone.classList.remove('border-indigo-500');
       if (e.dataTransfer.files.length > 0) {
+        currentSampleIndex = null;
         handleFileSelected(e.dataTransfer.files[0]);
       }
     });
 
     fileInput.addEventListener('change', () => {
-      if (fileInput.files.length > 0) handleFileSelected(fileInput.files[0]);
+      if (fileInput.files.length > 0) {
+        currentSampleIndex = null;
+        handleFileSelected(fileInput.files[0]);
+      }
     });
 
     function handleFileSelected(file) {
@@ -330,6 +455,7 @@
         dropzonePrompt.classList.add('hidden');
         previewContainer.classList.remove('hidden');
         analyzeBtn.disabled = false;
+        errorBox.classList.add('hidden');
       };
       reader.readAsDataURL(file);
     }
@@ -338,6 +464,7 @@
     document.querySelectorAll('.sample-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const src = btn.getAttribute('data-src');
+        currentSampleIndex = parseInt(btn.getAttribute('data-sample'), 10);
         try {
           const res = await fetch(src);
           const blob = await res.blob();
@@ -351,59 +478,245 @@
 
     // Test API connection
     async function checkApiHealth() {
+      if (isDemoMode) {
+        statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        return;
+      }
+
       const url = apiUrlInput.value.trim().replace(/\/+$/, '');
+      if (!url) {
+        statusDot.className = 'w-2 h-2 rounded-full bg-slate-500';
+        checkMixedContent();
+        return;
+      }
+
+      checkMixedContent();
       statusDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+
       try {
-        const res = await fetch(`${url}/health`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const res = await fetch(`${url}/health`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
         if (res.ok) {
           statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          errorBox.classList.add('hidden');
         } else {
-          statusDot.className = 'w-2 h-2 rounded-full bg-red-500';
+          statusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
         }
       } catch (e) {
-        statusDot.className = 'w-2 h-2 rounded-full bg-red-500';
+        statusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
       }
     }
+
     testApiBtn.addEventListener('click', checkApiHealth);
     checkApiHealth();
 
-    // Run Analysis
-    analyzeBtn.addEventListener('click', async () => {
+    // Benchmark Pre-computed Data for Instant Demo Mode
+    const DEMO_CASES = {
+      1: {
+        prediction: { class_name: "Severe", confidence: 42.5, ensemble_class_name: "Severe", ensemble_confidence: 34.0 },
+        consensus: { models_agree: false, msag_prediction: "Severe", vlm_prediction: "Mild", vlm_confidence: 28.5 },
+        probabilities: {
+          "No DR": { ensemble: 0.247, msag: 0.220 },
+          "Mild": { ensemble: 0.176, msag: 0.145 },
+          "Moderate": { ensemble: 0.079, msag: 0.065 },
+          "Severe": { ensemble: 0.340, msag: 0.425 },
+          "Proliferative DR": { ensemble: 0.158, msag: 0.145 }
+        },
+        vessel_density: 0.0812,
+        findings: {
+          pathology: "moderate-to-severe nonproliferative diabetic retinopathy (NPDR). Scattered hemorrhages, venous beading, and intraretinal microvascular abnormalities (IRMA) are observed.",
+          layercam_attention: "The LayerCAM activation is intense, highlighting hemorrhagic regions and vascular arcade clusters."
+        },
+        clinical_advice: {
+          risk_level: "High", risk_color: "#dc3545",
+          referral: "Urgent referral to retina specialist.", follow_up: "Re-examine in 2-4 months",
+          action_items: [
+            "URGENT: Refer to retina specialist within 2-4 weeks.",
+            "High risk of progression to proliferative DR (~50% within 1 year).",
+            "Consider early panretinal photocoagulation (PRP).",
+            "Evaluate for diabetic macular edema with OCT.",
+            "Intensive glycemic control — HbA1c target < 7.0%.",
+            "Strict blood pressure management (< 130/80 mmHg)."
+          ]
+        },
+        report_image: "./samples/report_1.png"
+      },
+      2: {
+        prediction: { class_name: "Severe", confidence: 39.8, ensemble_class_name: "Severe", ensemble_confidence: 32.7 },
+        consensus: { models_agree: false, msag_prediction: "Severe", vlm_prediction: "Moderate", vlm_confidence: 26.4 },
+        probabilities: {
+          "No DR": { ensemble: 0.194, msag: 0.170 },
+          "Mild": { ensemble: 0.230, msag: 0.210 },
+          "Moderate": { ensemble: 0.102, msag: 0.095 },
+          "Severe": { ensemble: 0.327, msag: 0.398 },
+          "Proliferative DR": { ensemble: 0.147, msag: 0.127 }
+        },
+        vessel_density: 0.0784,
+        findings: {
+          pathology: "focal microvascular abnormalities and scattered intraretinal blot hemorrhages.",
+          layercam_attention: "The LayerCAM heatmap emphasizes localized lesion clusters across the nasal and temporal vascular arcades."
+        },
+        clinical_advice: {
+          risk_level: "High", risk_color: "#dc3545",
+          referral: "Urgent referral to retina specialist.", follow_up: "Re-examine in 2-4 months",
+          action_items: [
+            "URGENT: Refer to retina specialist within 2-4 weeks.",
+            "Panretinal photocoagulation evaluation indicated.",
+            "Evaluate for macular edema with OCT scan.",
+            "Monitor glycemic and lipid profile closely."
+          ]
+        },
+        report_image: "./samples/report_2.png"
+      },
+      3: {
+        prediction: { class_name: "Severe", confidence: 51.2, ensemble_class_name: "Severe", ensemble_confidence: 43.3 },
+        consensus: { models_agree: true, msag_prediction: "Severe", vlm_prediction: "Severe", vlm_confidence: 38.0 },
+        probabilities: {
+          "No DR": { ensemble: 0.196, msag: 0.160 },
+          "Mild": { ensemble: 0.148, msag: 0.130 },
+          "Moderate": { ensemble: 0.074, msag: 0.065 },
+          "Severe": { ensemble: 0.433, msag: 0.512 },
+          "Proliferative DR": { ensemble: 0.149, msag: 0.133 }
+        },
+        vessel_density: 0.0751,
+        findings: {
+          pathology: "extensive hemorrhages spanning multiple quadrants and prominent microvascular abnormalities.",
+          layercam_attention: "LayerCAM shows prominent focal activations across hemorrhagic clusters with optic disc suppression."
+        },
+        clinical_advice: {
+          risk_level: "High", risk_color: "#dc3545",
+          referral: "Urgent referral to retina specialist.", follow_up: "Re-examine in 2-4 months",
+          action_items: [
+            "URGENT: Refer to retina specialist within 2-4 weeks.",
+            "Panretinal photocoagulation (PRP) evaluation.",
+            "Evaluate for macular edema with anti-VEGF therapy.",
+            "Intensive glycemic control — target HbA1c < 7.0%."
+          ]
+        },
+        report_image: "./samples/report_3.png"
+      },
+      4: {
+        prediction: { class_name: "Severe", confidence: 48.7, ensemble_class_name: "Severe", ensemble_confidence: 41.3 },
+        consensus: { models_agree: false, msag_prediction: "Severe", vlm_prediction: "Proliferative DR", vlm_confidence: 35.2 },
+        probabilities: {
+          "No DR": { ensemble: 0.233, msag: 0.195 },
+          "Mild": { ensemble: 0.081, msag: 0.070 },
+          "Moderate": { ensemble: 0.064, msag: 0.055 },
+          "Severe": { ensemble: 0.413, msag: 0.487 },
+          "Proliferative DR": { ensemble: 0.209, msag: 0.193 }
+        },
+        vessel_density: 0.0694,
+        findings: {
+          pathology: "advanced retinopathy with severe microvascular lesions and early proliferative signs.",
+          layercam_attention: "The LayerCAM signal captures peripheral vascular leakage and microaneurysm hotspots."
+        },
+        clinical_advice: {
+          risk_level: "High", risk_color: "#dc3545",
+          referral: "Urgent referral to retina specialist.", follow_up: "Re-examine in 2-4 months",
+          action_items: [
+            "URGENT: Refer to retina specialist immediately.",
+            "Evaluate for panretinal photocoagulation (PRP).",
+            "Screen for vitreous hemorrhage and tractional detachment risks."
+          ]
+        },
+        report_image: "./samples/report_4.png"
+      }
+    };
+
+    async function runAnalysis() {
       if (!currentFile) return;
 
       placeholderBox.classList.add('hidden');
       resultsBox.classList.add('hidden');
+      errorBox.classList.add('hidden');
       loadingBox.classList.remove('hidden');
       analyzeBtn.disabled = true;
+
+      // Handle Instant Demo Mode
+      if (isDemoMode) {
+        loadingSubtext.textContent = 'Loading pre-computed neural pipeline analysis...';
+        await new Promise(r => setTimeout(r, 600)); // smooth experience
+        const sampleKey = currentSampleIndex || 1;
+        renderResults(DEMO_CASES[sampleKey] || DEMO_CASES[1]);
+        loadingBox.classList.add('hidden');
+        analyzeBtn.disabled = false;
+        return;
+      }
+
+      // Live Backend API Call
+      const rawUrl = apiUrlInput.value.trim().replace(/\/+$/, '');
+      if (!rawUrl) {
+        showError('No API Endpoint Configured', 'Please enter your backend HTTPS URL (e.g. from Cloudflare Tunnel) or switch to Instant Demo Mode.');
+        loadingBox.classList.add('hidden');
+        analyzeBtn.disabled = false;
+        return;
+      }
+
+      if (window.location.protocol === 'https:' && rawUrl.startsWith('http://')) {
+        showError(
+          'Blocked by Browser (Mixed Content)',
+          `Your browser blocks requests to insecure HTTP (<code>${rawUrl}</code>) from an HTTPS site. Please start your Cloudflare HTTPS tunnel or click below to continue in Demo Mode.`
+        );
+        loadingBox.classList.add('hidden');
+        analyzeBtn.disabled = false;
+        return;
+      }
+
+      loadingSubtext.textContent = `Connecting to ${rawUrl}...`;
 
       const formData = new FormData();
       formData.append('file', currentFile);
       formData.append('msag_weight', msagSlider.value);
       formData.append('vlm_temperature', tempSlider.value);
 
-      const url = apiUrlInput.value.trim().replace(/\/+$/, '');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, 35000); // 35 second timeout
 
       try {
-        const response = await fetch(`${url}/predict`, {
+        const response = await fetch(`${rawUrl}/predict`, {
           method: 'POST',
           body: formData,
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
-          const errorDetail = await response.json().catch(() => ({ detail: 'Analysis failed' }));
-          throw new Error(errorDetail.detail || `HTTP Error ${response.status}`);
+          const errorDetail = await response.json().catch(() => ({ detail: `Server returned HTTP ${response.status}` }));
+          throw new Error(errorDetail.detail || `Server returned HTTP ${response.status}`);
         }
 
         const data = await response.json();
         renderResults(data);
       } catch (err) {
-        alert('API Connection Failed: ' + err.message + '\n\nPlease ensure your FastAPI backend is running at ' + url);
+        let msg = err.message;
+        if (err.name === 'AbortError') {
+          msg = 'Connection timed out after 35 seconds. The server may be busy or unreachable.';
+        } else if (msg === 'Failed to fetch') {
+          msg = `Could not reach ${rawUrl}. Either the server is offline, CORS blocked the request, or your browser blocked the connection.`;
+        }
+        showError('Analysis Request Failed', msg);
         placeholderBox.classList.remove('hidden');
       } finally {
+        clearTimeout(timeoutId);
         loadingBox.classList.add('hidden');
         analyzeBtn.disabled = false;
       }
-    });
+    }
+
+    function showError(title, msg) {
+      errorTitle.textContent = title;
+      errorMsg.innerHTML = msg;
+      errorBox.classList.remove('hidden');
+      statusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
+      errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    analyzeBtn.addEventListener('click', runAnalysis);
 
     function renderResults(data) {
       resultsBox.classList.remove('hidden');
