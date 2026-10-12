@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diabetic Retinopathy Screening & Explainability</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-50 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+          <i data-lucide="eye" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            RetinaVision AI
+            <span class="text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-medium">MSAG + BiomedCLIP</span>
+          </h1>
+          <p class="text-xs text-slate-400">Diabetic Retinopathy Multiclassification & LayerCAM Explainability</p>
+        </div>
+      </div>
+
+      <!-- Backend Connection Settings -->
+      <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="status-dot"></span>
+        <label for="api-url" class="text-slate-400 font-medium">API Endpoint:</label>
+        <input 
+          type="text" 
+          id="api-url" 
+          value="http://localhost:8000" 
+          class="bg-slate-800 text-slate-200 px-2 py-0.5 rounded border border-slate-700 font-mono text-xs focus:ring-1 focus:ring-indigo-500 outline-none w-48"
+          title="Enter your FastAPI backend URL (e.g., http://localhost:8000 or your Cloudflare/AWS URL)"
+        />
+        <button id="test-api-btn" class="hover:text-indigo-400 text-slate-400 transition" title="Test Connection">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Left Column: Image Upload & Parameters -->
+    <div class="lg:col-span-5 space-y-6">
+
+      <!-- Upload Card -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <h2 class="text-sm font-semibold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <i data-lucide="upload-cloud" class="w-4 h-4 text-indigo-400"></i>
+          Retinal Fundus Image
+        </h2>
+
+        <!-- Dropzone -->
+        <div 
+          id="dropzone" 
+          class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-6 text-center cursor-pointer transition bg-slate-900/50 hover:bg-slate-900 flex flex-col items-center justify-center min-h-[220px]"
+        >
+          <input type="file" id="file-input" accept="image/*" class="hidden">
+          
+          <div id="dropzone-prompt" class="space-y-3">
+            <div class="w-12 h-12 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
+              <i data-lucide="image" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-slate-200">Click to upload or drag & drop</p>
+              <p class="text-xs text-slate-500 mt-1">PNG, JPG, TIFF, WEBP or BMP</p>
+            </div>
+          </div>
+
+          <div id="preview-container" class="hidden w-full flex flex-col items-center">
+            <img id="image-preview" src="" alt="Fundus Preview" class="max-h-56 rounded-lg object-contain border border-slate-800 shadow">
+            <p id="file-name" class="text-xs text-slate-400 mt-2 truncate max-w-xs font-mono"></p>
+          </div>
+        </div>
+
+        <!-- Sample Case Buttons -->
+        <div class="mt-4 pt-4 border-t border-slate-800/80">
+          <p class="text-xs text-slate-400 font-medium mb-2 flex items-center justify-between">
+            <span>Or load benchmark samples:</span>
+            <span class="text-[10px] text-slate-500">1-click test</span>
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-src="./samples/sample_1.png">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Sample 1 (No DR)
+            </button>
+            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-src="./samples/sample_2.png">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span> Sample 2 (Mild)
+            </button>
+            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-src="./samples/sample_3.png">
+              <span class="w-2 h-2 rounded-full bg-orange-400"></span> Sample 3 (Moderate)
+            </button>
+            <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-src="./samples/sample_4.png">
+              <span class="w-2 h-2 rounded-full bg-red-400"></span> Sample 4 (PDR)
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Inference Settings Card -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <h2 class="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="sliders" class="w-4 h-4 text-indigo-400"></i>
+          Model Hyperparameters
+        </h2>
+
+        <!-- MSAG Weight Slider -->
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300 font-medium">MSAG Model Weight (Primary)</span>
+            <span id="msag-val" class="font-mono text-indigo-400 font-bold">0.70</span>
+          </div>
+          <input 
+            type="range" 
+            id="msag-slider" 
+            min="0" 
+            max="1" 
+            step="0.05" 
+            value="0.7" 
+            class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+          >
+          <div class="flex justify-between text-[10px] text-slate-500 mt-0.5">
+            <span>0.0 (BiomedCLIP only)</span>
+            <span>0.7 (Default)</span>
+            <span>1.0 (MSAG only)</span>
+          </div>
+        </div>
+
+        <!-- Temperature Slider -->
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-300 font-medium">BiomedCLIP Temperature</span>
+            <span id="temp-val" class="font-mono text-indigo-400 font-bold">2.0</span>
+          </div>
+          <input 
+            type="range" 
+            id="temp-slider" 
+            min="0.5" 
+            max="5" 
+            step="0.25" 
+            value="2.0" 
+            class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+          >
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          id="analyze-btn" 
+          disabled
+          class="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+        >
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Run Diagnostic Analysis</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Results & Clinical Advice -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- Placeholder State -->
+      <div id="placeholder-box" class="bg-slate-950 border border-slate-800/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[500px]">
+        <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
+          <i data-lucide="scan" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-200">No Fundus Image Analyzed Yet</h3>
+        <p class="text-sm text-slate-400 max-w-sm mt-1">
+          Upload a fundus photograph or click one of the benchmark samples on the left to begin screening.
+        </p>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading-box" class="hidden bg-slate-950 border border-slate-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[500px]">
+        <div class="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+        <h3 class="text-base font-semibold text-slate-200">Executing Multi-Modal Neural Pipeline...</h3>
+        <p class="text-xs text-slate-400 mt-1">Extracting multi-scale spatial features, zero-shot prompts & LayerCAM heatmaps</p>
+      </div>
+
+      <!-- Results Container -->
+      <div id="results-box" class="hidden space-y-6">
+
+        <!-- Diagnostic Assessment Banner -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Primary Diagnosis</p>
+              <div class="flex items-center gap-3 mt-1">
+                <span id="res-badge" class="px-3.5 py-1 rounded-lg text-white font-bold text-lg shadow"></span>
+                <span id="res-conf" class="text-slate-300 font-semibold text-sm"></span>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Risk Stratification</p>
+              <p id="res-risk" class="text-sm font-bold mt-1"></p>
+            </div>
+          </div>
+
+          <!-- Model Agreement Alert -->
+          <div id="consensus-alert" class="mt-4 p-3 rounded-xl text-xs font-medium flex items-center gap-2"></div>
+        </div>
+
+        <!-- 4-Panel Visual Report -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i>
+              Visual Diagnostic & Explainability Report
+            </h3>
+            <span id="vessel-density-badge" class="text-xs bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-slate-300 font-mono"></span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-900">
+            <img id="res-report-img" src="" alt="Diagnostic Report Figure" class="w-full h-auto">
+          </div>
+        </div>
+
+        <!-- Class Probability Breakdown -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3">
+          <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider mb-2">
+            Severity Probability Breakdown
+          </h3>
+          <div id="prob-bars-container" class="space-y-2.5"></div>
+        </div>
+
+        <!-- Clinical Findings & Doctor's Guidance -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="stethoscope" class="w-4 h-4 text-indigo-400"></i>
+            Clinical Findings & Recommendations
+          </h3>
+
+          <div class="bg-slate-900/70 border border-slate-800 p-4 rounded-xl space-y-2">
+            <p class="text-xs text-slate-400 font-semibold uppercase">Pathological Findings</p>
+            <p id="res-pathology" class="text-sm text-slate-200 leading-relaxed"></p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div class="bg-slate-900/70 border border-slate-800 p-3.5 rounded-xl">
+              <p class="text-slate-400 font-semibold mb-1">Referral Guideline</p>
+              <p id="res-referral" class="text-slate-200 font-medium"></p>
+            </div>
+            <div class="bg-slate-900/70 border border-slate-800 p-3.5 rounded-xl">
+              <p class="text-slate-400 font-semibold mb-1">Follow-up Schedule</p>
+              <p id="res-followup" class="text-slate-200 font-medium"></p>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/70 border border-slate-800 p-4 rounded-xl">
+            <p class="text-xs text-slate-400 font-semibold uppercase mb-2">Doctor's Action Checklist</p>
+            <ul id="res-action-items" class="space-y-1.5 text-xs text-slate-300"></ul>
+          </div>
+
+          <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-300/80 leading-relaxed">
+            <strong>Clinical Disclaimer:</strong> This application is an investigational AI screening tool. It is not an automated medical device and does not substitute certified ophthalmological examination.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // DOM Elements
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const dropzonePrompt = document.getElementById('dropzone-prompt');
+    const previewContainer = document.getElementById('preview-container');
+    const imagePreview = document.getElementById('image-preview');
+    const fileName = document.getElementById('file-name');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const msagSlider = document.getElementById('msag-slider');
+    const msagVal = document.getElementById('msag-val');
+    const tempSlider = document.getElementById('temp-slider');
+    const tempVal = document.getElementById('temp-val');
+    const apiUrlInput = document.getElementById('api-url');
+    const testApiBtn = document.getElementById('test-api-btn');
+    const statusDot = document.getElementById('status-dot');
+
+    const placeholderBox = document.getElementById('placeholder-box');
+    const loadingBox = document.getElementById('loading-box');
+    const resultsBox = document.getElementById('results-box');
+
+    let currentFile = null;
+
+    // Sliders synchronization
+    msagSlider.addEventListener('input', () => { msagVal.textContent = parseFloat(msagSlider.value).toFixed(2); });
+    tempSlider.addEventListener('input', () => { tempVal.textContent = parseFloat(tempSlider.value).toFixed(2); });
+
+    // File selection & Dropzone
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('border-indigo-500'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-indigo-500'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-indigo-500');
+      if (e.dataTransfer.files.length > 0) {
+        handleFileSelected(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) handleFileSelected(fileInput.files[0]);
+    });
+
+    function handleFileSelected(file) {
+      currentFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        fileName.textContent = file.name;
+        dropzonePrompt.classList.add('hidden');
+        previewContainer.classList.remove('hidden');
+        analyzeBtn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Sample buttons
+    document.querySelectorAll('.sample-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const src = btn.getAttribute('data-src');
+        try {
+          const res = await fetch(src);
+          const blob = await res.blob();
+          const file = new File([blob], src.split('/').pop(), { type: blob.type || 'image/png' });
+          handleFileSelected(file);
+        } catch (err) {
+          alert('Could not load sample image: ' + err.message);
+        }
+      });
+    });
+
+    // Test API connection
+    async function checkApiHealth() {
+      const url = apiUrlInput.value.trim().replace(/\/+$/, '');
+      statusDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+      try {
+        const res = await fetch(`${url}/health`);
+        if (res.ok) {
+          statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        } else {
+          statusDot.className = 'w-2 h-2 rounded-full bg-red-500';
+        }
+      } catch (e) {
+        statusDot.className = 'w-2 h-2 rounded-full bg-red-500';
+      }
+    }
+    testApiBtn.addEventListener('click', checkApiHealth);
+    checkApiHealth();
+
+    // Run Analysis
+    analyzeBtn.addEventListener('click', async () => {
+      if (!currentFile) return;
+
+      placeholderBox.classList.add('hidden');
+      resultsBox.classList.add('hidden');
+      loadingBox.classList.remove('hidden');
+      analyzeBtn.disabled = true;
+
+      const formData = new FormData();
+      formData.append('file', currentFile);
+      formData.append('msag_weight', msagSlider.value);
+      formData.append('vlm_temperature', tempSlider.value);
+
+      const url = apiUrlInput.value.trim().replace(/\/+$/, '');
+
+      try {
+        const response = await fetch(`${url}/predict`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorDetail = await response.json().catch(() => ({ detail: 'Analysis failed' }));
+          throw new Error(errorDetail.detail || `HTTP Error ${response.status}`);
+        }
+
+        const data = await response.json();
+        renderResults(data);
+      } catch (err) {
+        alert('API Connection Failed: ' + err.message + '\n\nPlease ensure your FastAPI backend is running at ' + url);
+        placeholderBox.classList.remove('hidden');
+      } finally {
+        loadingBox.classList.add('hidden');
+        analyzeBtn.disabled = false;
+      }
+    });
+
+    function renderResults(data) {
+      resultsBox.classList.remove('hidden');
+
+      // 1. Badge & Header
+      const badge = document.getElementById('res-badge');
+      badge.textContent = data.prediction.class_name;
+      badge.style.backgroundColor = data.clinical_advice.risk_color;
+
+      document.getElementById('res-conf').textContent = `Confidence: ${data.prediction.confidence.toFixed(1)}%`;
+      const riskEl = document.getElementById('res-risk');
+      riskEl.textContent = data.clinical_advice.risk_level;
+      riskEl.style.color = data.clinical_advice.risk_color;
+
+      // 2. Consensus Alert
+      const consensusBox = document.getElementById('consensus-alert');
+      if (data.consensus.models_agree) {
+        consensusBox.className = 'mt-4 p-3 rounded-xl text-xs font-medium flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300';
+        consensusBox.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Multi-Model Consensus: Both MSAG and BiomedCLIP agree on <strong>${data.prediction.class_name}</strong>.`;
+      } else {
+        consensusBox.className = 'mt-4 p-3 rounded-xl text-xs font-medium flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-300';
+        consensusBox.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i> Model Discrepancy: MSAG predicts <strong>${data.consensus.msag_prediction}</strong> vs BiomedCLIP predicts <strong>${data.consensus.vlm_prediction}</strong>.`;
+      }
+
+      // 3. Report Image
+      document.getElementById('res-report-img').src = data.report_image;
+      document.getElementById('vessel-density-badge').textContent = `Vessel Density: ${data.vessel_density.toFixed(4)}`;
+
+      // 4. Probability Bars
+      const barsContainer = document.getElementById('prob-bars-container');
+      barsContainer.innerHTML = '';
+      const colors = ["#28a745", "#ffc107", "#fd7e14", "#dc3545", "#721c24"];
+      let cIdx = 0;
+      for (const [cls, probs] of Object.entries(data.probabilities)) {
+        const pct = (probs.ensemble * 100).toFixed(1);
+        const barColor = (cls === data.prediction.class_name) ? colors[cIdx] : '#6366f1';
+        barsContainer.innerHTML += `
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-medium text-slate-300">${cls}</span>
+              <span class="font-mono text-slate-400">${pct}% <span class="text-[10px] text-slate-500">(MSAG: ${(probs.msag*100).toFixed(1)}%)</span></span>
+            </div>
+            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500" style="width: ${Math.max(pct, 1)}%; background-color: ${barColor};"></div>
+            </div>
+          </div>
+        `;
+        cIdx++;
+      }
+
+      // 5. Findings & Advice
+      document.getElementById('res-pathology').textContent = data.findings.pathology;
+      document.getElementById('res-referral').textContent = data.clinical_advice.referral;
+      document.getElementById('res-followup').textContent = data.clinical_advice.follow_up;
+
+      const actionList = document.getElementById('res-action-items');
+      actionList.innerHTML = '';
+      data.clinical_advice.action_items.forEach(item => {
+        const isUrgent = item.startsWith('URGENT') || item.startsWith('IMMEDIATE');
+        actionList.innerHTML += `
+          <li class="flex items-start gap-2">
+            <span class="${isUrgent ? 'text-red-400 font-bold' : 'text-indigo-400'}">•</span>
+            <span class="${isUrgent ? 'text-red-300 font-semibold' : ''}">${item}</span>
+          </li>
+        `;
+      });
+
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

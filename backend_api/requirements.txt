@@ -1,0 +1,14 @@
+fastapi>=0.110.0
+uvicorn>=0.28.0
+python-multipart>=0.0.9
+torch
+torchvision
+timm
+open-clip-torch
+transformers
+huggingface-hub
+safetensors
+opencv-python-headless
+matplotlib
+numpy
+Pillow

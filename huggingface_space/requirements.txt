@@ -1,0 +1,12 @@
+gradio>=5.0.0
+torch
+torchvision
+timm
+open-clip-torch
+transformers
+huggingface-hub
+safetensors
+opencv-python-headless
+matplotlib
+numpy
+Pillow
