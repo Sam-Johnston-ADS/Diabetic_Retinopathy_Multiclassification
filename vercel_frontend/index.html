@@ -528,23 +528,18 @@
       }
     };
 
+    const DEFAULT_LIVE_API_URL = "https://acquisition-letter-operate-oils.trycloudflare.com";
     let savedApiUrl = localStorage.getItem('retinavision_api_url') || "";
-    if (savedApiUrl.includes("maybe-zshops-yours-eagles")) {
-      localStorage.removeItem('retinavision_api_url');
-      savedApiUrl = "";
+    if (!savedApiUrl || savedApiUrl.includes("maybe-zshops-yours-eagles")) {
+      savedApiUrl = DEFAULT_LIVE_API_URL;
+      localStorage.setItem('retinavision_api_url', savedApiUrl);
     }
     apiUrlInput.value = savedApiUrl;
 
-    // Default to Instant Demo Mode so visitors immediately experience a working interactive app.
-    // When a live backend URL is configured, switch to Live API mode and test health.
-    if (savedApiUrl) {
-      isDemoMode = false;
-      setDemoMode(false);
-      checkApiHealth();
-    } else {
-      isDemoMode = true;
-      setDemoMode(true);
-    }
+    // Connect to live API backend
+    isDemoMode = false;
+    setDemoMode(false);
+    checkApiHealth();
 
     apiUrlInput.addEventListener('change', () => {
       localStorage.setItem('retinavision_api_url', apiUrlInput.value.trim());
