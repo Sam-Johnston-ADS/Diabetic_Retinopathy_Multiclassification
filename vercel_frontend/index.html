@@ -528,12 +528,23 @@
       }
     };
 
-    const DEFAULT_LIVE_API_URL = "https://maybe-zshops-yours-eagles.trycloudflare.com";
-    const savedApiUrl = localStorage.getItem('retinavision_api_url') || DEFAULT_LIVE_API_URL;
+    let savedApiUrl = localStorage.getItem('retinavision_api_url') || "";
+    if (savedApiUrl.includes("maybe-zshops-yours-eagles")) {
+      localStorage.removeItem('retinavision_api_url');
+      savedApiUrl = "";
+    }
     apiUrlInput.value = savedApiUrl;
-    isDemoMode = false; // Live API is online!
-    setDemoMode(isDemoMode);
-    checkApiHealth();
+
+    // Default to Instant Demo Mode so visitors immediately experience a working interactive app.
+    // When a live backend URL is configured, switch to Live API mode and test health.
+    if (savedApiUrl) {
+      isDemoMode = false;
+      setDemoMode(false);
+      checkApiHealth();
+    } else {
+      isDemoMode = true;
+      setDemoMode(true);
+    }
 
     apiUrlInput.addEventListener('change', () => {
       localStorage.setItem('retinavision_api_url', apiUrlInput.value.trim());

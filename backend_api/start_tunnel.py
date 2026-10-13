@@ -26,10 +26,16 @@ print("=" * 70)
 print("  Starting RetinaVision AI Inference Backend & HTTPS Tunnel")
 print("=" * 70)
 
+# Pick python binary (prefer .venv if available)
+python_bin = sys.executable
+venv_python = PROJECT_ROOT / ".venv" / "bin" / "python"
+if venv_python.exists():
+    python_bin = str(venv_python)
+
 # 1. Start FastAPI / Uvicorn Server
-print("[1/2] Launching FastAPI backend server on port 8000...")
+print(f"[1/2] Launching FastAPI backend server on port 8000 using {python_bin}...")
 uvicorn_cmd = [
-    sys.executable,
+    python_bin,
     "-m",
     "uvicorn",
     "backend_api.main:app",
