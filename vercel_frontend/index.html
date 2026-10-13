@@ -528,13 +528,12 @@
       }
     };
 
-    // Load saved API URL from localStorage or default
-    const savedApiUrl = localStorage.getItem('retinavision_api_url');
-    if (savedApiUrl) {
-      apiUrlInput.value = savedApiUrl;
-      isDemoMode = false;
-    }
+    const DEFAULT_LIVE_API_URL = "https://maybe-zshops-yours-eagles.trycloudflare.com";
+    const savedApiUrl = localStorage.getItem('retinavision_api_url') || DEFAULT_LIVE_API_URL;
+    apiUrlInput.value = savedApiUrl;
+    isDemoMode = false; // Live API is online!
     setDemoMode(isDemoMode);
+    checkApiHealth();
 
     apiUrlInput.addEventListener('change', () => {
       localStorage.setItem('retinavision_api_url', apiUrlInput.value.trim());
