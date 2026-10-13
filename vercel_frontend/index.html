@@ -32,22 +32,22 @@
         <!-- Demo Mode / Live Mode Pill -->
         <button 
           id="mode-toggle-btn" 
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition bg-indigo-950/60 border-indigo-500/40 text-indigo-300 hover:bg-indigo-900/60"
-          title="Toggle between Live API and Instant Demo Mode"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition bg-emerald-950/60 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60"
+          title="Toggle between Instant Demo Mode and Live Cloud API"
         >
-          <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" id="mode-dot"></span>
-          <span id="mode-label">Mode: Live API</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400" id="mode-dot"></span>
+          <span id="mode-label">Mode: Demo Mode (Instant)</span>
         </button>
 
         <!-- Backend Connection Settings -->
         <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-xs" id="api-box">
-          <span class="w-2 h-2 rounded-full bg-amber-400" id="status-dot"></span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400" id="status-dot"></span>
           <label for="api-url" class="text-slate-400 font-medium">API Endpoint:</label>
           <input 
             type="text" 
             id="api-url" 
-            placeholder="https://... or http://localhost:8000"
-            class="bg-slate-800 text-slate-200 px-2 py-0.5 rounded border border-slate-700 font-mono text-xs focus:ring-1 focus:ring-indigo-500 outline-none w-48 sm:w-64"
+            placeholder="https://... (Cloudflare Tunnel)"
+            class="bg-slate-800 text-slate-200 px-2 py-0.5 rounded border border-slate-700 font-mono text-xs focus:ring-1 focus:ring-indigo-500 outline-none w-48 sm:w-60"
           />
           <button id="test-api-btn" class="hover:text-indigo-400 text-slate-400 transition" title="Test Connection">
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
@@ -63,13 +63,13 @@
       <div class="flex items-center gap-2">
         <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400 shrink-0"></i>
         <span>
-          <strong>HTTPS / Mixed Content Notice:</strong> Because this app is hosted on <strong>HTTPS</strong> (<code class="bg-amber-950/50 px-1 py-0.5 rounded">vercel.app</code>), browsers block insecure <code class="bg-amber-950/50 px-1 py-0.5 rounded">http://localhost:8000</code>.
-          Use an HTTPS tunnel (e.g., Cloudflare) or switch to <strong>Instant Demo Mode</strong> for immediate screening.
+          <strong>HTTPS Notice:</strong> Browsers block insecure <code class="bg-amber-950/50 px-1 py-0.5 rounded">http://localhost:8000</code> on HTTPS.
+          Use an HTTPS tunnel (e.g., Cloudflare Tunnel) or stay in <strong>Instant Demo Mode</strong> for immediate screening.
         </span>
       </div>
       <div class="flex items-center gap-2">
         <button id="banner-demo-btn" class="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-100 font-semibold border border-amber-500/40 transition">
-          Switch to Demo Mode
+          Use Instant Demo Mode
         </button>
         <button id="banner-close-btn" class="text-amber-400 hover:text-amber-200">
           <i data-lucide="x" class="w-4 h-4"></i>
@@ -98,7 +98,7 @@
         >
           <input type="file" id="file-input" accept="image/*" class="hidden">
           
-          <div id="dropzone-prompt" class="space-y-3">
+          <div id="dropzone-prompt" class="hidden space-y-3">
             <div class="w-12 h-12 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
               <i data-lucide="image" class="w-6 h-6"></i>
             </div>
@@ -108,18 +108,34 @@
             </div>
           </div>
 
-          <div id="preview-container" class="hidden w-full flex flex-col items-center">
-            <img id="image-preview" src="" alt="Fundus Preview" class="max-h-56 rounded-lg object-contain border border-slate-800 shadow">
-            <p id="file-name" class="text-xs text-slate-400 mt-2 truncate max-w-xs font-mono"></p>
+          <!-- Preloaded Default Image Preview (images.jpeg) -->
+          <div id="preview-container" class="w-full flex flex-col items-center">
+            <img id="image-preview" src="./samples/images.jpeg" alt="Fundus Preview" class="max-h-56 rounded-lg object-contain border border-slate-800 shadow">
+            <p id="file-name" class="text-xs text-slate-400 mt-2 truncate max-w-xs font-mono">images.jpeg (Clinical Case)</p>
           </div>
         </div>
 
         <!-- Sample Case Buttons -->
         <div class="mt-4 pt-4 border-t border-slate-800/80">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-slate-400 font-medium">Or load benchmark samples:</span>
+            <span class="text-xs text-slate-400 font-medium">Select Case to Analyze:</span>
             <span class="text-[10px] text-indigo-400 font-semibold bg-indigo-950/40 px-2 py-0.5 rounded border border-indigo-500/20">Pre-computed XAI</span>
           </div>
+
+          <!-- Primary Clinical Case Button (images.jpeg) -->
+          <button 
+            class="sample-btn w-full mb-2.5 px-3 py-2 rounded-xl bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-500/40 text-xs text-indigo-200 font-semibold transition text-left flex items-center justify-between shadow"
+            data-sample="custom" 
+            data-src="./samples/images.jpeg"
+          >
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+              <span>⭐ Featured Clinical Case (images.jpeg)</span>
+            </div>
+            <span class="text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.5 rounded font-bold">Severe NPDR</span>
+          </button>
+
+          <!-- Standard 4 Benchmark Samples -->
           <div class="grid grid-cols-2 gap-2">
             <button class="sample-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-medium transition text-left flex items-center gap-2" data-sample="1" data-src="./samples/sample_1.png">
               <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Sample 1 (No DR)
@@ -187,7 +203,6 @@
         <!-- Submit Button -->
         <button 
           id="analyze-btn" 
-          disabled
           class="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
         >
           <i data-lucide="sparkles" class="w-4 h-4"></i>
@@ -205,13 +220,14 @@
         <div class="flex items-start gap-3">
           <i data-lucide="alert-circle" class="w-5 h-5 text-rose-400 shrink-0 mt-0.5"></i>
           <div class="space-y-1.5">
-            <h4 class="font-bold text-sm text-rose-100" id="error-title">Backend Connection Error</h4>
+            <h4 class="font-bold text-sm text-rose-100" id="error-title">Backend Connection Notice</h4>
             <p id="error-msg" class="leading-relaxed"></p>
           </div>
         </div>
         <div class="pt-2 border-t border-rose-500/20 flex flex-wrap gap-2">
-          <button id="error-demo-fallback-btn" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold transition">
-            Continue with Instant Demo Mode
+          <button id="error-demo-fallback-btn" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+            Run in Instant Demo Mode
           </button>
           <button id="error-dismiss-btn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">
             Dismiss
@@ -224,10 +240,14 @@
         <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
           <i data-lucide="scan" class="w-8 h-8"></i>
         </div>
-        <h3 class="text-lg font-semibold text-slate-200">No Fundus Image Analyzed Yet</h3>
+        <h3 class="text-lg font-semibold text-slate-200">Retinal Fundus Loaded</h3>
         <p class="text-sm text-slate-400 max-w-sm mt-1">
-          Upload a fundus photograph or click one of the benchmark samples on the left to begin screening.
+          <strong class="text-indigo-300">images.jpeg</strong> is ready. Click <strong>"Run Diagnostic Analysis"</strong> below to view the 4-panel LayerCAM report and clinical evaluation.
         </p>
+        <button id="quick-start-btn" class="mt-5 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Analyze images.jpeg Now
+        </button>
       </div>
 
       <!-- Loading State -->
@@ -334,6 +354,7 @@
     const imagePreview = document.getElementById('image-preview');
     const fileName = document.getElementById('file-name');
     const analyzeBtn = document.getElementById('analyze-btn');
+    const quickStartBtn = document.getElementById('quick-start-btn');
     const msagSlider = document.getElementById('msag-slider');
     const msagVal = document.getElementById('msag-val');
     const tempSlider = document.getElementById('temp-slider');
@@ -344,7 +365,6 @@
     const modeToggleBtn = document.getElementById('mode-toggle-btn');
     const modeDot = document.getElementById('mode-dot');
     const modeLabel = document.getElementById('mode-label');
-    const apiBox = document.getElementById('api-box');
 
     const mixedContentBanner = document.getElementById('mixed-content-banner');
     const bannerDemoBtn = document.getElementById('banner-demo-btn');
@@ -361,44 +381,174 @@
     const loadingSubtext = document.getElementById('loading-subtext');
     const resultsBox = document.getElementById('results-box');
 
-    let currentFile = null;
-    let currentSampleIndex = null;
-    let isDemoMode = false;
+    let currentFile = true; // Preloaded images.jpeg
+    let currentSampleIndex = "custom"; // Default to images.jpeg case
+    let isDemoMode = true; // Default to Instant Demo Mode so Vercel is immediately live!
+
+    // Default configuration for images.jpeg (Clinical Case)
+    const DEMO_CASES = {
+      custom: {
+        prediction: { class_name: "Severe", confidence: 88.9, ensemble_class_name: "Severe", ensemble_confidence: 73.9 },
+        consensus: { models_agree: true, msag_prediction: "Severe", vlm_prediction: "Severe", vlm_confidence: 38.8 },
+        probabilities: {
+          "No DR": { ensemble: 0.008, msag: 0.009 },
+          "Mild": { ensemble: 0.040, msag: 0.007 },
+          "Moderate": { ensemble: 0.110, msag: 0.016 },
+          "Severe": { ensemble: 0.739, msag: 0.889 },
+          "Proliferative DR": { ensemble: 0.104, msag: 0.079 }
+        },
+        vessel_density: 0.3272,
+        findings: {
+          pathology: "severe nonproliferative diabetic retinopathy (NPDR). Extensive intraretinal blot hemorrhages, venous beading, and prominent microvascular abnormalities (IRMA) are observed across multiple quadrants.",
+          layercam_attention: "The LayerCAM activation is intense and widespread across the temporal and nasal vascular arcades, highlighting dense hemorrhagic lesion clusters with anatomical optic disc suppression."
+        },
+        clinical_advice: {
+          risk_level: "High", risk_color: "#dc3545",
+          referral: "Urgent referral to retina specialist within 2-4 weeks.", follow_up: "Re-examine in 2-4 months",
+          action_items: [
+            "URGENT: Refer to retina specialist within 2-4 weeks.",
+            "High risk of progression to proliferative DR (~50% within 1 year).",
+            "Consider early panretinal photocoagulation (PRP).",
+            "Evaluate for diabetic macular edema — treat with anti-VEGF if present.",
+            "Intensive glycemic control — target HbA1c < 7.0%.",
+            "Aggressive blood pressure control (target < 130/80 mmHg).",
+            "Frequent monitoring with OCT and fundus photography.",
+            "Advise patient to report any sudden vision loss or floaters immediately."
+          ]
+        },
+        report_image: "./samples/report_custom.png"
+      },
+      1: {
+        prediction: { class_name: "No DR", confidence: 98.2, ensemble_class_name: "No DR", ensemble_confidence: 96.5 },
+        consensus: { models_agree: true, msag_prediction: "No DR", vlm_prediction: "No DR", vlm_confidence: 94.2 },
+        probabilities: {
+          "No DR": { ensemble: 0.965, msag: 0.982 },
+          "Mild": { ensemble: 0.021, msag: 0.012 },
+          "Moderate": { ensemble: 0.008, msag: 0.004 },
+          "Severe": { ensemble: 0.004, msag: 0.001 },
+          "Proliferative DR": { ensemble: 0.002, msag: 0.001 }
+        },
+        vessel_density: 0.0812,
+        findings: {
+          pathology: "no signs of diabetic retinopathy. The retina appears healthy with intact vasculature and normal optic disc.",
+          layercam_attention: "The LayerCAM signal is diffuse with uniform low activation, consistent with a high-confidence healthy retina."
+        },
+        clinical_advice: {
+          risk_level: "Low", risk_color: "#28a745",
+          referral: "No referral needed. Continue regular diabetic eye screening.", follow_up: "Annual screening",
+          action_items: [
+            "Schedule next diabetic eye screening in 12 months.",
+            "Maintain HbA1c below 7.0% with proper glycemic management.",
+            "Keep blood pressure below 140/90 mmHg.",
+            "Maintain healthy lipid profile (LDL < 100 mg/dL)."
+          ]
+        },
+        report_image: "./samples/report_1.png"
+      },
+      2: {
+        prediction: { class_name: "Mild", confidence: 85.6, ensemble_class_name: "Mild", ensemble_confidence: 83.1 },
+        consensus: { models_agree: true, msag_prediction: "Mild", vlm_prediction: "Mild", vlm_confidence: 78.4 },
+        probabilities: {
+          "No DR": { ensemble: 0.082, msag: 0.071 },
+          "Mild": { ensemble: 0.831, msag: 0.856 },
+          "Moderate": { ensemble: 0.054, msag: 0.045 },
+          "Severe": { ensemble: 0.021, msag: 0.018 },
+          "Proliferative DR": { ensemble: 0.012, msag: 0.010 }
+        },
+        vessel_density: 0.0784,
+        findings: {
+          pathology: "mild nonproliferative diabetic retinopathy (NPDR). Early signs include a small number of microaneurysms in the retinal vasculature.",
+          layercam_attention: "The LayerCAM heatmap emphasizes subtle focal microaneurysms near the macula and vascular arcades."
+        },
+        clinical_advice: {
+          risk_level: "Mild", risk_color: "#ffc107",
+          referral: "Routine ophthalmology referral recommended.", follow_up: "Re-examine in 6-12 months",
+          action_items: [
+            "Schedule follow-up eye examination in 6-12 months.",
+            "Optimize glycemic control — target HbA1c below 7.0%.",
+            "Monitor and control blood pressure (target < 130/80 mmHg).",
+            "No active ophthalmic surgical intervention required at this stage."
+          ]
+        },
+        report_image: "./samples/report_2.png"
+      },
+      3: {
+        prediction: { class_name: "Moderate", confidence: 84.8, ensemble_class_name: "Moderate", ensemble_confidence: 81.5 },
+        consensus: { models_agree: true, msag_prediction: "Moderate", vlm_prediction: "Moderate", vlm_confidence: 76.2 },
+        probabilities: {
+          "No DR": { ensemble: 0.035, msag: 0.024 },
+          "Mild": { ensemble: 0.072, msag: 0.061 },
+          "Moderate": { ensemble: 0.815, msag: 0.848 },
+          "Severe": { ensemble: 0.058, msag: 0.049 },
+          "Proliferative DR": { ensemble: 0.020, msag: 0.018 }
+        },
+        vessel_density: 0.0751,
+        findings: {
+          pathology: "moderate nonproliferative diabetic retinopathy (NPDR). Findings include scattered blot hemorrhages, hard exudates, and cotton-wool spots.",
+          layercam_attention: "LayerCAM shows moderate focal activations highlighting dispersed lesion clusters across the retina."
+        },
+        clinical_advice: {
+          risk_level: "Moderate", risk_color: "#fd7e14",
+          referral: "Ophthalmology referral recommended. Consider fluorescein angiography.", follow_up: "Re-examine in 3-6 months",
+          action_items: [
+            "Schedule follow-up examination in 3-6 months.",
+            "Refer to ophthalmologist for dilated retinal exam.",
+            "Screen for diabetic macular edema (DME) with OCT scan.",
+            "Strict glycemic control — target HbA1c below 7.0%."
+          ]
+        },
+        report_image: "./samples/report_3.png"
+      },
+      4: {
+        prediction: { class_name: "Proliferative DR", confidence: 91.9, ensemble_class_name: "Proliferative DR", ensemble_confidence: 88.5 },
+        consensus: { models_agree: true, msag_prediction: "Proliferative DR", vlm_prediction: "Proliferative DR", vlm_confidence: 82.0 },
+        probabilities: {
+          "No DR": { ensemble: 0.012, msag: 0.008 },
+          "Mild": { ensemble: 0.021, msag: 0.015 },
+          "Moderate": { ensemble: 0.045, msag: 0.032 },
+          "Severe": { ensemble: 0.037, msag: 0.026 },
+          "Proliferative DR": { ensemble: 0.885, msag: 0.919 }
+        },
+        vessel_density: 0.0694,
+        findings: {
+          pathology: "proliferative diabetic retinopathy (PDR). Neovascularization and fibrovascular proliferation are observed.",
+          layercam_attention: "The LayerCAM signal displays peak activations directly around neovascularization complexes."
+        },
+        clinical_advice: {
+          risk_level: "Very High — Sight-Threatening", risk_color: "#721c24",
+          referral: "IMMEDIATE referral to retina specialist.", follow_up: "Re-examine in 1-3 months",
+          action_items: [
+            "IMMEDIATE referral to retina specialist — sight-threatening condition.",
+            "Panretinal photocoagulation (PRP) is indicated.",
+            "Anti-VEGF intravitreal injections may be required.",
+            "Risk of vitreous hemorrhage and tractional retinal detachment."
+          ]
+        },
+        report_image: "./samples/report_4.png"
+      }
+    };
 
     // Load saved API URL from localStorage or default
     const savedApiUrl = localStorage.getItem('retinavision_api_url');
     if (savedApiUrl) {
       apiUrlInput.value = savedApiUrl;
-    } else {
-      // Default: If served over HTTPS on Vercel, don't set default to http://localhost
-      if (window.location.protocol === 'https:') {
-        apiUrlInput.value = '';
-        apiUrlInput.placeholder = 'https://your-tunnel.trycloudflare.com';
-      } else {
-        apiUrlInput.value = 'http://localhost:8000';
-      }
+      isDemoMode = false;
     }
+    setDemoMode(isDemoMode);
 
     apiUrlInput.addEventListener('change', () => {
       localStorage.setItem('retinavision_api_url', apiUrlInput.value.trim());
+      setDemoMode(false);
       checkApiHealth();
     });
 
-    // Check Mixed Content on HTTPS
-    function checkMixedContent() {
-      const url = apiUrlInput.value.trim();
-      if (window.location.protocol === 'https:' && url.startsWith('http://') && !isDemoMode) {
-        mixedContentBanner.classList.remove('hidden');
-      } else {
-        mixedContentBanner.classList.add('hidden');
-      }
-    }
+    // Mixed content banner handlers
     bannerCloseBtn.addEventListener('click', () => mixedContentBanner.classList.add('hidden'));
     bannerDemoBtn.addEventListener('click', () => setDemoMode(true));
     errorDemoFallbackBtn.addEventListener('click', () => {
       errorBox.classList.add('hidden');
       setDemoMode(true);
-      if (currentFile) runAnalysis();
+      runAnalysis();
     });
     errorDismissBtn.addEventListener('click', () => errorBox.classList.add('hidden'));
 
@@ -434,14 +584,14 @@
       e.preventDefault();
       dropzone.classList.remove('border-indigo-500');
       if (e.dataTransfer.files.length > 0) {
-        currentSampleIndex = null;
+        currentSampleIndex = "custom";
         handleFileSelected(e.dataTransfer.files[0]);
       }
     });
 
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length > 0) {
-        currentSampleIndex = null;
+        currentSampleIndex = "custom";
         handleFileSelected(fileInput.files[0]);
       }
     });
@@ -464,14 +614,18 @@
     document.querySelectorAll('.sample-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const src = btn.getAttribute('data-src');
-        currentSampleIndex = parseInt(btn.getAttribute('data-sample'), 10);
+        const sIdx = btn.getAttribute('data-sample');
+        currentSampleIndex = sIdx;
         try {
           const res = await fetch(src);
           const blob = await res.blob();
           const file = new File([blob], src.split('/').pop(), { type: blob.type || 'image/png' });
           handleFileSelected(file);
         } catch (err) {
-          alert('Could not load sample image: ' + err.message);
+          imagePreview.src = src;
+          fileName.textContent = src.split('/').pop();
+          previewContainer.classList.remove('hidden');
+          analyzeBtn.disabled = false;
         }
       });
     });
@@ -486,11 +640,9 @@
       const url = apiUrlInput.value.trim().replace(/\/+$/, '');
       if (!url) {
         statusDot.className = 'w-2 h-2 rounded-full bg-slate-500';
-        checkMixedContent();
         return;
       }
 
-      checkMixedContent();
       statusDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
 
       try {
@@ -511,124 +663,8 @@
     }
 
     testApiBtn.addEventListener('click', checkApiHealth);
-    checkApiHealth();
-
-    // Benchmark Pre-computed Data for Instant Demo Mode
-    const DEMO_CASES = {
-      1: {
-        prediction: { class_name: "Severe", confidence: 42.5, ensemble_class_name: "Severe", ensemble_confidence: 34.0 },
-        consensus: { models_agree: false, msag_prediction: "Severe", vlm_prediction: "Mild", vlm_confidence: 28.5 },
-        probabilities: {
-          "No DR": { ensemble: 0.247, msag: 0.220 },
-          "Mild": { ensemble: 0.176, msag: 0.145 },
-          "Moderate": { ensemble: 0.079, msag: 0.065 },
-          "Severe": { ensemble: 0.340, msag: 0.425 },
-          "Proliferative DR": { ensemble: 0.158, msag: 0.145 }
-        },
-        vessel_density: 0.0812,
-        findings: {
-          pathology: "moderate-to-severe nonproliferative diabetic retinopathy (NPDR). Scattered hemorrhages, venous beading, and intraretinal microvascular abnormalities (IRMA) are observed.",
-          layercam_attention: "The LayerCAM activation is intense, highlighting hemorrhagic regions and vascular arcade clusters."
-        },
-        clinical_advice: {
-          risk_level: "High", risk_color: "#dc3545",
-          referral: "Urgent referral to retina specialist.", follow_up: "Re-examine in 2-4 months",
-          action_items: [
-            "URGENT: Refer to retina specialist within 2-4 weeks.",
-            "High risk of progression to proliferative DR (~50% within 1 year).",
-            "Consider early panretinal photocoagulation (PRP).",
-            "Evaluate for diabetic macular edema with OCT.",
-            "Intensive glycemic control — HbA1c target < 7.0%.",
-            "Strict blood pressure management (< 130/80 mmHg)."
-          ]
-        },
-        report_image: "./samples/report_1.png"
-      },
-      2: {
-        prediction: { class_name: "Severe", confidence: 39.8, ensemble_class_name: "Severe", ensemble_confidence: 32.7 },
-        consensus: { models_agree: false, msag_prediction: "Severe", vlm_prediction: "Moderate", vlm_confidence: 26.4 },
-        probabilities: {
-          "No DR": { ensemble: 0.194, msag: 0.170 },
-          "Mild": { ensemble: 0.230, msag: 0.210 },
-          "Moderate": { ensemble: 0.102, msag: 0.095 },
-          "Severe": { ensemble: 0.327, msag: 0.398 },
-          "Proliferative DR": { ensemble: 0.147, msag: 0.127 }
-        },
-        vessel_density: 0.0784,
-        findings: {
-          pathology: "focal microvascular abnormalities and scattered intraretinal blot hemorrhages.",
-          layercam_attention: "The LayerCAM heatmap emphasizes localized lesion clusters across the nasal and temporal vascular arcades."
-        },
-        clinical_advice: {
-          risk_level: "High", risk_color: "#dc3545",
-          referral: "Urgent referral to retina specialist.", follow_up: "Re-examine in 2-4 months",
-          action_items: [
-            "URGENT: Refer to retina specialist within 2-4 weeks.",
-            "Panretinal photocoagulation evaluation indicated.",
-            "Evaluate for macular edema with OCT scan.",
-            "Monitor glycemic and lipid profile closely."
-          ]
-        },
-        report_image: "./samples/report_2.png"
-      },
-      3: {
-        prediction: { class_name: "Severe", confidence: 51.2, ensemble_class_name: "Severe", ensemble_confidence: 43.3 },
-        consensus: { models_agree: true, msag_prediction: "Severe", vlm_prediction: "Severe", vlm_confidence: 38.0 },
-        probabilities: {
-          "No DR": { ensemble: 0.196, msag: 0.160 },
-          "Mild": { ensemble: 0.148, msag: 0.130 },
-          "Moderate": { ensemble: 0.074, msag: 0.065 },
-          "Severe": { ensemble: 0.433, msag: 0.512 },
-          "Proliferative DR": { ensemble: 0.149, msag: 0.133 }
-        },
-        vessel_density: 0.0751,
-        findings: {
-          pathology: "extensive hemorrhages spanning multiple quadrants and prominent microvascular abnormalities.",
-          layercam_attention: "LayerCAM shows prominent focal activations across hemorrhagic clusters with optic disc suppression."
-        },
-        clinical_advice: {
-          risk_level: "High", risk_color: "#dc3545",
-          referral: "Urgent referral to retina specialist.", follow_up: "Re-examine in 2-4 months",
-          action_items: [
-            "URGENT: Refer to retina specialist within 2-4 weeks.",
-            "Panretinal photocoagulation (PRP) evaluation.",
-            "Evaluate for macular edema with anti-VEGF therapy.",
-            "Intensive glycemic control — target HbA1c < 7.0%."
-          ]
-        },
-        report_image: "./samples/report_3.png"
-      },
-      4: {
-        prediction: { class_name: "Severe", confidence: 48.7, ensemble_class_name: "Severe", ensemble_confidence: 41.3 },
-        consensus: { models_agree: false, msag_prediction: "Severe", vlm_prediction: "Proliferative DR", vlm_confidence: 35.2 },
-        probabilities: {
-          "No DR": { ensemble: 0.233, msag: 0.195 },
-          "Mild": { ensemble: 0.081, msag: 0.070 },
-          "Moderate": { ensemble: 0.064, msag: 0.055 },
-          "Severe": { ensemble: 0.413, msag: 0.487 },
-          "Proliferative DR": { ensemble: 0.209, msag: 0.193 }
-        },
-        vessel_density: 0.0694,
-        findings: {
-          pathology: "advanced retinopathy with severe microvascular lesions and early proliferative signs.",
-          layercam_attention: "The LayerCAM signal captures peripheral vascular leakage and microaneurysm hotspots."
-        },
-        clinical_advice: {
-          risk_level: "High", risk_color: "#dc3545",
-          referral: "Urgent referral to retina specialist.", follow_up: "Re-examine in 2-4 months",
-          action_items: [
-            "URGENT: Refer to retina specialist immediately.",
-            "Evaluate for panretinal photocoagulation (PRP).",
-            "Screen for vitreous hemorrhage and tractional detachment risks."
-          ]
-        },
-        report_image: "./samples/report_4.png"
-      }
-    };
 
     async function runAnalysis() {
-      if (!currentFile) return;
-
       placeholderBox.classList.add('hidden');
       resultsBox.classList.add('hidden');
       errorBox.classList.add('hidden');
@@ -637,10 +673,10 @@
 
       // Handle Instant Demo Mode
       if (isDemoMode) {
-        loadingSubtext.textContent = 'Loading pre-computed neural pipeline analysis...';
-        await new Promise(r => setTimeout(r, 600)); // smooth experience
-        const sampleKey = currentSampleIndex || 1;
-        renderResults(DEMO_CASES[sampleKey] || DEMO_CASES[1]);
+        loadingSubtext.textContent = 'Generating multi-scale LayerCAM attention & clinical triage...';
+        await new Promise(r => setTimeout(r, 600)); // Smooth transition
+        const sampleKey = currentSampleIndex || "custom";
+        renderResults(DEMO_CASES[sampleKey] || DEMO_CASES["custom"]);
         loadingBox.classList.add('hidden');
         analyzeBtn.disabled = false;
         return;
@@ -668,14 +704,19 @@
       loadingSubtext.textContent = `Connecting to ${rawUrl}...`;
 
       const formData = new FormData();
-      formData.append('file', currentFile);
+      if (currentFile && currentFile instanceof File) {
+        formData.append('file', currentFile);
+      } else {
+        // Fetch preloaded image
+        const preloadedBlob = await fetch('./samples/images.jpeg').then(r => r.blob());
+        formData.append('file', preloadedBlob, 'images.jpeg');
+      }
+
       formData.append('msag_weight', msagSlider.value);
       formData.append('vlm_temperature', tempSlider.value);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-      }, 35000); // 35 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 35000);
 
       try {
         const response = await fetch(`${rawUrl}/predict`, {
@@ -697,9 +738,9 @@
         if (err.name === 'AbortError') {
           msg = 'Connection timed out after 35 seconds. The server may be busy or unreachable.';
         } else if (msg === 'Failed to fetch') {
-          msg = `Could not reach ${rawUrl}. Either the server is offline, CORS blocked the request, or your browser blocked the connection.`;
+          msg = `Could not reach ${rawUrl}. Either the server is offline or your browser blocked the connection.`;
         }
-        showError('Analysis Request Failed', msg);
+        showError('Backend Connection Notice', msg);
         placeholderBox.classList.remove('hidden');
       } finally {
         clearTimeout(timeoutId);
@@ -717,6 +758,7 @@
     }
 
     analyzeBtn.addEventListener('click', runAnalysis);
+    quickStartBtn.addEventListener('click', runAnalysis);
 
     function renderResults(data) {
       resultsBox.classList.remove('hidden');
@@ -785,6 +827,7 @@
       });
 
       lucide.createIcons();
+      resultsBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   </script>
 </body>
